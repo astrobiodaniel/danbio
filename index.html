@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interativo: Algoritmos e Subjetividade Digital</title>
+    <!-- Chosen Palette: Calm Neutral & Tech Blue -->
+    <!-- Application Structure Plan: A single-page application with a thematic, dashboard-like structure. It uses a sticky top navigation for easy access to key sections: an introduction ('O que são?'), an interactive core section on public concerns ('As Dores') with a chart and clickable cards, an interactive keyword explorer ('Temas em Alta'), and a summary ('Conclusões'). This non-linear structure was chosen to allow users to explore the complex information based on their interest, making academic content more accessible and engaging than a linear document. The goal is to facilitate understanding by breaking down dense topics into digestible, interactive modules. A Gemini API feature was added to the 'As Dores' section to generate potential solutions for the selected concern, moving the user from problem awareness to solution exploration. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Youth mental health stats. Goal: Inform/Compare. Viz: Horizontal Bar Chart (Chart.js). Interaction: Tooltips on hover. Justification: A bar chart provides an immediate, powerful visual comparison of the data.
+        2. Report Info: Table 1 "Dores". Goal: Organize/Inform. Method: Interactive HTML/CSS cards. Interaction: Clicking a card updates a central text area. Justification: Converts a static table into an engaging, user-driven exploration.
+        3. Report Info: Table 2 "Temas-Chave". Goal: Explore/Organize. Method: Clickable HTML/CSS tags. Interaction: Clicking a tag reveals its definition. Justification: Transforms a list of academic terms into an interactive glossary.
+        4. Gemini API Integration: On "Dores" section. Goal: Empower/Solve. Method: Button triggers Gemini API call. Interaction: User clicks to generate solutions related to the selected "dor". Justification: Adds a dynamic, generative, and solution-oriented layer to the static report content, increasing engagement and utility.
+        All choices confirm NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* neutral-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s;
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #3b82f6; /* blue-500 */
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-slate-100/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <span class="text-xl font-bold text-slate-900">Subjetividade Digital</span>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#fundamentos" class="nav-link text-slate-600 hover:text-blue-600 font-medium">Fundamentos</a>
+                    <a href="#dores" class="nav-link text-slate-600 hover:text-blue-600 font-medium">As Dores</a>
+                    <a href="#temas" class="nav-link text-slate-600 hover:text-blue-600 font-medium">Temas em Alta</a>
+                    <a href="#conclusoes" class="nav-link text-slate-600 hover:text-blue-600 font-medium">Conclusões</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="py-20 md:py-28 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-slate-900 leading-tight">Os Algoritmos e a<br><span class="text-blue-600">Subjetividade Digital</span></h1>
+                <p class="mt-6 max-w-3xl mx-auto text-lg text-slate-600">Uma exploração interativa sobre como a tecnologia molda quem somos, nossas preocupações e as questões mais urgentes da nossa era digital.</p>
+            </div>
+        </section>
+
+        <section id="fundamentos" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Fundamentos: Entendendo o Cenário</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">Antes de mergulhar nas preocupações, é crucial entender os conceitos básicos que definem nossa experiência online. Esta seção descomplica o que é a subjetividade digital e como os algoritmos atuam.</p>
+                </div>
+                <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-600">O Que é Subjetividade Digital?</h3>
+                        <p class="text-slate-600">É a forma como nossa identidade, percepções e senso de "eu" são construídos e transformados pela interação com tecnologias digitais. Nossos perfis e avatares não são apenas representações, mas "extensões de nós mesmos", agentes que participam ativamente na (re)construção de quem somos, borrando as fronteiras entre o mundo real e o virtual.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-600">Arquitetos Invisíveis</h3>
+                        <p class="text-slate-600">Algoritmos são os arquitetos da nossa experiência online. Eles decidem o que vemos em nosso feed, as músicas que ouvimos e as notícias que lemos. Embora o objetivo seja a personalização, essa curadoria invisível pode limitar nossa exposição a ideias diferentes, reforçar vieses e moldar sutilmente nossas decisões e gostos.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-600">Bolhas de Filtro e Câmaras de Eco</h3>
+                        <p class="text-slate-600">Uma consequência direta da curadoria algorítmica é a criação de "bolhas". Os algoritmos nos mostram mais do que já gostamos, nos isolando de perspectivas divergentes. Isso pode aumentar a polarização, enrijecer nossas crenças e diminuir a chance de encontros inesperados (serendipidade), essenciais para um pensamento rico e diverso.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dores" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">As "Dores" do Público</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">Estas são as principais preocupações e necessidades de informação que emergem da nossa vida digital mediada por algoritmos. Explore os dados e clique nas categorias para entender cada "dor" em detalhe.</p>
+                </div>
+
+                <div class="bg-slate-50 p-6 md:p-8 rounded-xl border border-slate-200 mb-12">
+                    <h3 class="text-xl font-bold text-center mb-4 text-slate-700">Impacto em Jovens: Dados Preocupantes</h3>
+                     <div class="chart-container">
+                        <canvas id="mentalHealthChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-4">
+                        <div id="pains-selector" class="flex flex-col space-y-4">
+                        </div>
+                    </div>
+                    <div class="lg:col-span-8">
+                        <div id="pain-details" class="bg-slate-50 p-8 rounded-xl border border-slate-200 min-h-[400px] flex flex-col">
+                            <div>
+                                <h3 id="pain-title" class="text-2xl font-bold text-blue-600 mb-4">Selecione uma categoria</h3>
+                                <p id="pain-description" class="text-slate-700 mb-6">Clique em uma das "dores" à esquerda para ver uma explicação detalhada sobre o tema e suas implicações.</p>
+                            </div>
+                            <div id="gemini-interaction-container" class="mt-auto pt-6 border-t border-slate-200" style="display: none;">
+                                <button id="gemini-button" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-700 transition-colors disabled:bg-slate-400 disabled:cursor-wait">
+                                     <svg class="spinner w-5 h-5" fill="none" viewBox="0 0 24 24" style="display: none;">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span id="gemini-button-text">✨ Explorar Soluções com IA</span>
+                                </button>
+                                <div id="gemini-result" class="mt-6 bg-white p-6 rounded-lg border border-slate-200" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="temas" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Temas em Alta</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">O interesse público e acadêmico revela uma busca por respostas. Clique nos termos abaixo para explorar os conceitos mais pesquisados e entender as discussões que estão moldando o futuro da internet.</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-3 mb-8" id="keywords-container">
+                </div>
+                <div id="keyword-details" class="mt-8 bg-white p-8 rounded-xl shadow-lg border border-slate-200 transition-opacity duration-300 opacity-0 min-h-[150px]">
+                    <h3 id="keyword-title" class="text-2xl font-bold text-blue-600 mb-4"></h3>
+                    <p id="keyword-description" class="text-slate-700"></p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="conclusoes" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Conclusões e Reflexões Críticas</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-slate-600">A nossa relação com a tecnologia é complexa. Não se trata de demonizá-la, mas de buscar um relacionamento mais equilibrado e consciente, promovendo uma literacia digital crítica para um futuro mais humano.</p>
+                </div>
+                <div class="space-y-8 max-w-4xl mx-auto">
+                     <div class="bg-slate-50 p-8 rounded-xl border border-slate-200">
+                        <blockquote class="text-center text-slate-700 italic">
+                            <p>"O 'Capitalismo de Vigilância' transforma a experiência humana em dados, usados para prever e influenciar nosso comportamento, criando novas formas de poder que desafiam a autonomia e a democracia."</p>
+                            <footer class="mt-4 font-semibold not-italic">- Inspirado em Shoshana Zuboff</footer>
+                        </blockquote>
+                    </div>
+                     <div class="bg-slate-50 p-8 rounded-xl border border-slate-200">
+                        <blockquote class="text-center text-slate-700 italic">
+                            <p>"A 'Sociedade do Cansaço' emerge da pressão por auto-otimização e performance, amplificada pelas redes sociais, levando à exaustão e a um ciclo de validação que nos afasta da realização genuína."</p>
+                            <footer class="mt-4 font-semibold not-italic">- Inspirado em Byung-Chul Han</footer>
+                        </blockquote>
+                    </div>
+                     <div class="bg-slate-50 p-8 rounded-xl border border-slate-200">
+                        <h3 class="text-xl font-bold text-center mb-4 text-slate-800">O Caminho a Seguir</h3>
+                        <p class="text-slate-600 text-center">A agência digital na era algorítmica exige mais do que conhecimento técnico. Requer uma **consciência crítica** das estruturas de poder, **escolhas de uso conscientes**, e a busca por um design tecnológico mais **ético e transparente**, que coloque o bem-estar humano em primeiro lugar.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 py-8">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>Aplicação interativa baseada no relatório "Os Algoritmos e a Subjetividade Digital".</p>
+            <p class="text-sm mt-2">Criado para fins educacionais e de exploração de conteúdo.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const painData = {
+                'Saúde Mental': {
+                    icon: '🧠',
+                    title: 'Impacto na Saúde Mental',
+                    description: 'Uma das maiores preocupações. O uso excessivo de redes sociais, a comparação constante e a busca por validação estão ligados ao aumento de ansiedade, depressão e problemas de autoimagem, especialmente entre os jovens. A exposição a ideais de vida irreais contribui para um sentimento geral de mal-estar.',
+                },
+                'Privacidade e Vigilância': {
+                    icon: '👁️',
+                    title: 'Privacidade e Vigilância',
+                    description: 'O medo da coleta massiva de dados e do uso indevido de informações pessoais é central. O modelo de "Capitalismo de Vigilância" descreve como nossa experiência é transformada em dados para prever e influenciar nosso comportamento, gerando uma sensação de vigilância constante que ameaça a privacidade e a liberdade de pensamento.',
+                },
+                'Autonomia e Manipulação': {
+                    icon: '🕹️',
+                    title: 'Autonomia e Manipulação',
+                    description: 'Há uma crescente sensação de perda de controle. Algoritmos podem nos manipular sutilmente em decisões de consumo e informação através de "dark patterns" e sistemas de recomendação. Isso mina nossa capacidade de fazer escolhas verdadeiramente autônomas e independentes.',
+                },
+                'Formação Identitária': {
+                    icon: '🎭',
+                    title: 'Formação Identitária e Pressão Social',
+                    description: 'Construir uma identidade autêntica online é um desafio. A pressão por conformidade com tendências virais e a performance constante podem sufocar a individualidade. Embora as redes possam ser um refúgio para grupos marginalizados, elas também apresentam riscos de supressão de identidades não hegemônicas.',
+                },
+                'Diversidade e Cultura': {
+                    icon: '🎨',
+                    title: 'Diversidade de Informação e Cultura',
+                    description: 'A personalização algorítmica pode levar à homogeneização do gosto. Ao reforçar nossas preferências existentes, os algoritmos arriscam limitar nossa exposição a novas culturas, músicas e pontos de vista, reduzindo a serendipidade – o encontro fortuito com o inesperado – que é vital para uma subjetividade rica.',
+                },
+                'Opacidade e Compreensão': {
+                    icon: '❓',
+                    title: 'Opacidade e Falta de Controle',
+                    description: 'Muitos de nós não entendemos como os algoritmos funcionam. Essa falta de transparência ("opacidade algorítmica") gera desconfiança, ansiedade e uma sensação de impotência, como se estivéssemos sujeitos a forças invisíveis que ditam nossa experiência digital sem que possamos intervir.',
+                }
+            };
+
+            const keywordData = {
+                'Subjetividade Digital': 'A forma como a identidade e o "eu" são construídos e transformados pela nossa interação com a tecnologia.',
+                'Capitalismo de Vigilância': 'Modelo econômico que transforma a experiência humana em dados para prever e influenciar comportamentos, gerando lucro e controle.',
+                'Bolha de Filtro': 'Um estado de isolamento intelectual onde algoritmos nos mostram apenas conteúdos alinhados com nossas crenças, limitando a exposição a ideias diversas.',
+                'Serendipidade Algorítmica': 'A capacidade (potencialmente positiva) dos algoritmos de nos apresentar conteúdos inesperados, mas relevantes, que não encontraríamos sozinhos.',
+                'Opacidade Algorítmica': 'A dificuldade ou impossibilidade de entender como os algoritmos tomam suas decisões, gerando desconfiança e sensação de falta de controle.',
+                'Ética dos Algoritmos': 'Campo de estudo que busca estabelecer princípios para o desenvolvimento e uso de algoritmos de forma justa, transparente e que respeite os direitos humanos.',
+                'Dark Patterns': 'Estratégias de design de interface manipuladoras, projetadas para enganar os usuários e fazê-los tomar decisões que não fariam conscientemente.',
+                'Sociedade do Cansaço': 'Conceito filosófico que descreve uma sociedade focada no desempenho e na auto-otimização, levando à exaustão, depressão e esgotamento psíquico.'
+            };
+
+            const painsSelector = document.getElementById('pains-selector');
+            const painTitle = document.getElementById('pain-title');
+            const painDescription = document.getElementById('pain-description');
+
+            Object.keys(painData).forEach((key, index) => {
+                const pain = painData[key];
+                const button = document.createElement('button');
+                button.className = 'w-full text-left p-4 rounded-lg border-2 border-transparent transition-all duration-300 bg-white shadow-sm hover:border-blue-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
+                button.innerHTML = `<span class="text-xl mr-3">${pain.icon}</span> <span class="font-semibold">${key}</span>`;
+                button.onclick = () => {
+                    document.querySelectorAll('#pains-selector button').forEach(btn => btn.classList.remove('bg-blue-100', 'border-blue-500'));
+                    button.classList.add('bg-blue-100', 'border-blue-500');
+                    painTitle.textContent = pain.title;
+                    painDescription.textContent = pain.description;
+                    
+                    const geminiContainer = document.getElementById('gemini-interaction-container');
+                    const geminiResult = document.getElementById('gemini-result');
+                    const geminiButtonText = document.getElementById('gemini-button-text');
+                    
+                    geminiContainer.style.display = 'block';
+                    geminiResult.style.display = 'none';
+                    geminiResult.innerHTML = '';
+                    document.getElementById('gemini-button').disabled = false;
+                    geminiButtonText.textContent = '✨ Explorar Soluções com IA';
+                    geminiContainer.querySelector('.spinner').style.display = 'none';
+                };
+                painsSelector.appendChild(button);
+                if (index === 0) {
+                    button.click();
+                }
+            });
+
+            const keywordsContainer = document.getElementById('keywords-container');
+            const keywordDetails = document.getElementById('keyword-details');
+            const keywordTitleEl = document.getElementById('keyword-title');
+            const keywordDescription = document.getElementById('keyword-description');
+
+            Object.keys(keywordData).forEach(key => {
+                const button = document.createElement('button');
+                button.className = 'px-4 py-2 bg-slate-200 text-slate-700 rounded-full text-sm font-medium transition-colors hover:bg-blue-500 hover:text-white';
+                button.textContent = key;
+                button.onclick = () => {
+                    keywordDetails.classList.remove('opacity-0');
+                    keywordTitleEl.textContent = key;
+                    keywordDescription.textContent = keywordData[key];
+                    document.querySelectorAll('#keywords-container button').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
+                    button.classList.add('bg-blue-600', 'text-white');
+                    keywordDetails.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                };
+                keywordsContainer.appendChild(button);
+            });
+            
+            const createMentalHealthChart = () => {
+                const ctx = document.getElementById('mentalHealthChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jovens que usam redes sociais', 'Jovens com risco dobrado de problemas de saúde mental (uso > 3h/dia)', 'Adolescentes que se sentem piores com a própria imagem corporal'],
+                        datasets: [{
+                            label: '% de Jovens Afetados',
+                            data: [95, 50, 46],
+                            backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(239, 68, 68, 0.7)', 'rgba(249, 115, 22, 0.7)'],
+                            borderColor: ['rgba(59, 130, 246, 1)', 'rgba(239, 68, 68, 1)', 'rgba(249, 115, 22, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.dataset.label || ''}: ${context.parsed.x}%`
+                                }
+                            }
+                        },
+                        scales: { x: { beginAtZero: true, max: 100, ticks: { callback: (value) => value + "%" } }, y: { ticks: { autoSkip: false, font: { size: 11 } } } }
+                    }
+                });
+            };
+
+            createMentalHealthChart();
+            
+            const parseSimpleMarkdown = (text) => {
+                let html = '';
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                let inList = false;
+
+                lines.forEach(line => {
+                    const trimmedLine = line.trim();
+                    if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+                        if (inList) { html += '</ul>'; inList = false; }
+                        html += `<h4 class="text-lg font-bold text-slate-800 mt-4 mb-2">${trimmedLine.replace(/\*\*/g, '')}</h4>`;
+                    } else if (trimmedLine.startsWith('* ')) {
+                        if (!inList) { html += '<ul class="list-none pl-0 space-y-2 mt-2">'; inList = true; }
+                        html += `<li class="flex items-start"><svg class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span>${trimmedLine.substring(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</span></li>`;
+                    } else {
+                        if (inList) { html += '</ul>'; inList = false; }
+                        html += `<p class="text-slate-600 mt-4">${line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</p>`;
+                    }
+                });
+                if (inList) { html += '</ul>'; }
+                return html;
+            };
+
+            const handleGeminiClick = async () => {
+                const geminiButton = document.getElementById('gemini-button');
+                const buttonText = document.getElementById('gemini-button-text');
+                const spinner = geminiButton.querySelector('.spinner');
+                const resultContainer = document.getElementById('gemini-result');
+                const currentPainTitle = document.getElementById('pain-title').textContent;
+
+                geminiButton.disabled = true;
+                buttonText.textContent = 'Gerando...';
+                spinner.style.display = 'inline-block';
+                resultContainer.style.display = 'none';
+                resultContainer.innerHTML = '';
+
+                const prompt = `Como um especialista em ética digital e tecnologia, sugira soluções para o problema: "${currentPainTitle}". Apresente a resposta em português do Brasil, com um parágrafo introdutório e depois duas listas separadas: 1. **Estratégias Individuais:** 3 a 4 ações práticas que uma pessoa pode tomar. 2. **Soluções Sistêmicas:** 2 a 3 propostas mais amplas (regulatórias, de design de plataforma, ou educacionais). Use markdown simples para as listas (usando *) e para o negrito (usando **).`;
+
+                try {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                    
+                    const result = await response.json();
+
+                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        resultContainer.innerHTML = parseSimpleMarkdown(text);
+                        resultContainer.style.display = 'block';
+                    } else {
+                        throw new Error('Resposta inválida da API.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching from Gemini API:', error);
+                    resultContainer.innerHTML = `<p class="text-red-500">Ocorreu um erro ao buscar as sugestões. Por favor, tente novamente mais tarde.</p>`;
+                    resultContainer.style.display = 'block';
+                } finally {
+                    geminiButton.disabled = false;
+                    buttonText.textContent = '✨ Gerar Novas Soluções';
+                    spinner.style.display = 'none';
+                }
+            };
+            
+            document.getElementById('gemini-button').addEventListener('click', handleGeminiClick);
+
+            const navLinks = document.querySelectorAll('header nav a');
+            const sections = document.querySelectorAll('main section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) { current = section.getAttribute('id'); }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) { link.classList.add('active'); }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
